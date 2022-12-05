@@ -1,0 +1,83 @@
+VERSION 5.00
+Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} CallLogs 
+   Caption         =   "Call Tracking Form"
+   ClientHeight    =   5310
+   ClientLeft      =   120
+   ClientTop       =   465
+   ClientWidth     =   11475
+   OleObjectBlob   =   "CallLogs.frx":0000
+   StartUpPosition =   1  'CenterOwner
+End
+Attribute VB_Name = "CallLogs"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = False
+
+Private Sub cmdClear_Click()
+    Dim ctrl As Control
+    
+    For Each ctrl In Me.Controls
+        If TypeName(ctrl) = "ComboBox" Or TypeName(ctrl) = "TextBox" Then
+            ctrl.Value = ""
+        ElseIf TypeName(ctrl) = "CheckBox" Then
+            ctrl.Value = False
+        End If
+    Next ctrl
+    
+    Me.txtCallDate.Value = Format(Date, "mm/dd/yyyy")
+    
+End Sub
+
+Private Sub cmdEndTime_Click()
+    Me.txtEndTime.Value = Format(Time, "hh:mm:ss")
+End Sub
+
+Private Sub cmdStartTime_Click()
+    Me.txtStartTime.Value = Format(Time, "hh:mm:ss")
+End Sub
+
+Private Sub cmdSubmit_Click()
+    If Me.txtEndTime.Value = "" Then
+        MsgBox ("Click the END TIME button before submitting")
+    Else
+        GenerateCallID
+    
+        Worksheets(Me.cboEmployee.Value).Select
+        
+        Range("A1").Select
+    
+        If ActiveCell.Offset(1, 0).Value = "" Then
+            ActiveCell.Offset(1, 0).Select
+        Else
+            Selection.End(xlDown).Offset(1, 0).Select
+        End If
+        
+        ActiveCell.Value = nextID
+        ActiveCell.Offset(0, 1).Value = Me.cboEmployee.Value
+        ActiveCell.Offset(0, 2).Value = Me.cboCallType.Value
+        ActiveCell.Offset(0, 3).Value = Me.txtCallDate.Value
+        ActiveCell.Offset(0, 4).Value = Me.txtStartTime.Value
+        ActiveCell.Offset(0, 5).Value = Me.txtEndTime.Value
+        ActiveCell.Offset(0, 6).Value = Format((ActiveCell.Offset(0, 5).Value - ActiveCell.Offset(0, 4).Value), "hh:mm:ss")
+        ActiveCell.Offset(0, 7).Value = Me.txtCallNotes.Value
+        ActiveCell.Offset(0, 8).Value = Me.chkResolved.Value
+    End If
+    
+End Sub
+
+Private Sub UserForm_Initialize()
+
+    Dim i As Integer
+    
+    For i = 2 To Worksheets.Count
+        Me.cboEmployee.AddItem Worksheets(i).Name
+    Next i
+    
+    Me.cboCallType.AddItem "Payment"
+    Me.cboCallType.AddItem "Registration"
+    Me.cboCallType.AddItem "Update"
+    Me.cboCallType.AddItem "Cancel"
+    
+    Me.txtCallDate.Value = Format(Date, "mm/dd/yyyy")
+End Sub

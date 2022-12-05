@@ -1,0 +1,86 @@
+Attribute VB_Name = "Module1"
+Global nextID As Integer
+
+Public Sub ShowCallForm()
+    CallLogs.Show
+End Sub
+
+
+Public Sub GenerateCallID()
+    Dim largestID() As Integer
+    Dim i As Integer
+    
+    ReDim largestID(1 To Worksheets.Count - 1)
+    
+    For i = 2 To Worksheets.Count
+        Worksheets(i).Select
+        Range("A2").Select
+        Range(Selection, Selection.End(xlDown)).Select
+        
+        largestID(i - 1) = Application.Max(Selection)
+    Next i
+    
+    nextID = Application.Max(largestID) + 1
+End Sub
+
+Public Sub ShowPrintReport()
+    PrintLogReport.Show
+End Sub
+
+Public Sub CreateTemSheet()
+    Dim i As Integer
+    
+    Application.ScreenUpdating = flase
+    
+    Worksheets.Add(after:=Worksheets(Worksheets.Count)).Name = "Temp Stats"
+    
+    For i = 2 To Worksheets.Count - 1
+        Worksheets(i).Select
+        
+        Range("A2").Select
+        
+        If ActiveCell.Value <> "" Then
+            Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
+            Selection.Copy
+            Worksheets(Worksheets.Count).Select
+            
+            Range("A1").Select
+            
+            If ActiveCell.Value = "" Then
+                ActiveSheet.Paste
+            Else
+                Range("A10000").Select
+                Selection.End(xlUp).Offset(1, 0).Select
+                ActiveSheet.Paste
+            End If
+        End If
+    Next i
+    
+    Application.ScreenUpdating = True
+    
+End Sub
+
+Public Sub CreateCallStats()
+    Dim lastCell As String
+    
+    Range("G1").Select
+    
+    If ActiveCell.Value <> "" Then
+        Selection.End(xlDown).Select
+        lastCell = ActiveCell.Address
+        
+        ActiveCell.Offset(1, 0).Value = "=Average(G1:" & lastCell & ")"
+        ActiveCell.Offset(2, 0).Value = "=MAX(G1:" & lastCell & ")"
+        ActiveCell.Offset(3, 0).Value = "=MIN(G1:" & lastCell & ")"
+        ActiveCell.Offset(4, 0).Value = "=COUNT(G1:" & lastCell & ")"
+        
+        frmCallStats.txtAverageCallTime.Value = Format(ActiveCell.Offset(1, 0).Value, "hh:mm:ss")
+        frmCallStats.txtMaxCallTime.Value = Format(ActiveCell.Offset(2, 0).Value, "hh:mm:ss")
+        frmCallStats.txtMinCallTime.Value = Format(ActiveCell.Offset(3, 0).Value, "hh:mm:ss")
+        frmCallStats.txtTotalCalls.Value = ActiveCell.Offset(4, 0).Value
+    End If
+End Sub
+
+Public Sub ShowCallStatsForm()
+    frmCallStats.Show
+End Sub

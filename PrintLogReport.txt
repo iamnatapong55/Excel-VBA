@@ -1,0 +1,66 @@
+VERSION 5.00
+Begin {C62A69F0-16DC-11CE-9E98-00AA00574A4F} PrintLogReport 
+   Caption         =   "UserForm1"
+   ClientHeight    =   4215
+   ClientLeft      =   120
+   ClientTop       =   465
+   ClientWidth     =   6150
+   OleObjectBlob   =   "PrintLogReport.frx":0000
+   StartUpPosition =   1  'CenterOwner
+End
+Attribute VB_Name = "PrintLogReport"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = False
+Private Sub CommandButton1_Click()
+    Dim reportworkbook As Object
+    Dim i As Integer
+    
+    Me.Hide
+    
+    Application.ScreenUpdating = flase
+    
+    Set reportworkbook = Workbooks.Add("C:\Users\CDL 1000 User\OneDrive - CDL 1000\Desktop\ExcelMacro\CallLogReport.xlsx")
+    
+    Workbooks("CallTracking.xlsm").Activate
+    
+    For i = 0 To Me.EmployeePrint.Controls.Count - 1
+        If Me.EmployeePrint.Controls(i).Value = True Then
+            Worksheets(Me.EmployeePrint.Controls(i).Caption).Select
+            
+            Range("A2").Select
+            
+            If ActiveCell.Value <> "" Then
+                Range(Selection, ActiveCell.SpecialCells(xlLastCell)).Select
+                Selection.Copy
+                
+                Workbooks(reportworkbook.Name).Activate
+                
+                Range("A2").Select
+                
+                If ActiveCell.Value = "" Then
+                    ActiveSheet.Paste
+                Else
+                    Range("A10000").Select
+                    Selection.End(xlUp).Offset(1, 0).Select
+                    ActiveSheet.Paste
+                End If
+                Workbooks("CallTracking.xlsm").Activate
+            End If
+        End If
+    Next i
+    Worksheets(1).Select
+    
+    Workbooks(reportworkbook.Name).Activate
+    
+    Application.ScreenUpdating = True
+End Sub
+
+Private Sub CommandButton2_Click()
+    Me.Hide
+End Sub
+
+Private Sub UserForm_Click()
+
+End Sub
